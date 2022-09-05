@@ -24,7 +24,24 @@ metadata_surface <- metadata %>%
   arrange(ATTRIBUTE_Location, ATTRIBUTE_Depth)
 
 # Extracting list of samples in order of cycle and day.
-samples_in_order <- rownames(metadata_surface)
-samples_in_order
+surface_samples_in_order <- rownames(metadata_surface)
+surface_samples_in_order
+
+# Reading all data
+asv_16s <- getDataFromTable("ASV_16S.csv", vars_toDrop_beg = 0, vars_toDrop_end = 8)
+
+#Converting char variables into numeric without loosing DF structure
+for (colX in colnames(asv_16s)) {
+  print(colX)
+  asv_16s[colX] <- as.numeric(asv_16s[colX][,1])
+}
 
 
+
+
+
+
+
+asv_18s <- getDataFromTable("ASV_18SV9.csv", vars_toDrop_beg = 0, vars_toDrop_end = 10)
+
+metabolites <- getDataFromTable("Metabolites_Feature Table.csv", vars_toDrop_beg = 2, vars_toDrop_end = 0)
