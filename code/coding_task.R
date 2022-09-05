@@ -1,4 +1,6 @@
 library(dplyr)
+library(vegan)
+library(ggplot2)
 
 setwd("C:/Users/marce/Documents/Repos/coding_task/data")
 
@@ -35,6 +37,23 @@ for (colX in colnames(asv_16s)) {
   print(colX)
   asv_16s[colX] <- as.numeric(asv_16s[colX][,1])
 }
+
+# Extracting surface samples in cycle-day order
+surface_asv16s <- asv_16s[surface_samples_in_order,]
+
+
+data_richness <- estimateR(surface_asv16s)
+
+t(data_richness)
+
+data.frame(t(data_richness))$S.chao1
+
+test2 <- data.frame(cbind(row.names(surface_asv16s), as.numeric(data.frame(t(data_richness))$S.chao1)))
+
+test2[,2] <- as.numeric(test2[,2])
+
+ggplot(test2, aes(x=X1, y=X2))+
+  geom_point()
 
 
 
