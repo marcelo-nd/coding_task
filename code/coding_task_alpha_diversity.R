@@ -213,3 +213,14 @@ all_bray_plot_metabolites <- ggplot(data = all_bray_pcoa_df_metabolites, aes(x=p
 all_bray_plot_metabolites
 
 ##########################################################################################
+
+##### Correlation between 16s AVSs and metabolites #####
+##########################################################################################
+# Check thath rowns in both DFs are the same
+row.names(asv_16s) == row.names(metabolites)
+
+cor_table <- cor(asv_16s, metabolites, method = "pearson")
+
+cor_table_small <- cor_table[0:100, 0:100]
+
+heatmap(cor_table_small)
