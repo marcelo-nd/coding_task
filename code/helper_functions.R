@@ -11,7 +11,10 @@ getDataFromTable <- function(data_path, vars_toDrop_beg = 0, vars_toDrop_end = 0
 
 convert_all_cols_to_numeric <- function(dataframe){
   for (colX in colnames(dataframe)) {
-    dataframe[colX] <- as.numeric(dataframe[colX][,1])
+    print(colX)
+    if (!is.na(colX)) {
+      dataframe[colX] <- as.numeric(dataframe[colX][,1])
+    }
   }
   
   return(dataframe)

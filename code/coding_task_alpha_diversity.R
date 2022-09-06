@@ -2,6 +2,8 @@ library(dplyr)
 library(vegan)
 library(ggplot2)
 
+source("C:/Users/marce/Documents/Repos/coding_task/code/helper_functions.R")
+
 ##### Plot alpha diversity #####
 ##########################################################################################
 # 16s AVSs =================================
@@ -216,11 +218,36 @@ all_bray_plot_metabolites
 
 ##### Correlation between 16s AVSs and metabolites #####
 ##########################################################################################
-# Check thath rowns in both DFs are the same
-row.names(asv_16s) == row.names(metabolites)
+ASV_16S <- read_csv("ASV_16S.csv")
 
-cor_table <- cor(asv_16s, metabolites, method = "pearson")
+ASV_16S_genus <- ASV_16S[, 2:(ncol(ASV_16S)-8)]
+
+ASV_16S_genus <- cbind(ASV_16S["Genus16S"], ASV_16S_genus)
+
+ASV_16S_genus <- ASV_16S_genus %>%
+  group_by(Genus16S) %>%
+  summarise_all(funs(sum))
+
+ASV_16S_genus <- data.frame(t(ASV_16S_genus[1:157,]))
+
+colnames(ASV_16S_genus) <- ASV_16S_genus[1,]
+
+ASV_16S_genus <- ASV_16S_genus[2:nrow(ASV_16S_genus),]
+
+ASV_16S_genus <- convert_all_cols_to_numeric(ASV_16S_genus)
+
+# Extract samples present in ASVs tables
+metabolites <- metabolites[row.names(asv_16s),]
+
+# Check that row names in both DFs are the same
+row.names(ASV_16S_genus) == row.names(metabolites)
+
+cor_table <- cor(ASV_16S_genus, metabolites, method = "pearson")
 
 cor_table_small <- cor_table[0:100, 0:100]
 
 heatmap(cor_table_small)
+
+edges_genus <- data.frame(row=rownames(cor_table_small)[row(cor_table_small)], col=colnames(cor_table_small)[col(cor_table_small)], corr=c(cor_table_small))
+
+write.csv(edges_genus, "edges_genus.csv", row.names = FALSE)
