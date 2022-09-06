@@ -55,7 +55,7 @@ asv_18s <- convert_all_cols_to_numeric(asv_18s)
 surface_asv18s <- asv_18s[row.names(metadata_surface),]
 
 # Check samples are in same order
-#row.names(surface_asv18s) == row.names(metadata_surface)
+row.names(surface_asv18s) == row.names(metadata_surface)
 
 # Get dataframe with metadata and chao1 index information to plot
 surface_alpha_diversity_asv18s <- get_alpha_diversity(dataframe = surface_asv18s, metadata_df = metadata_surface, useful_metadata_cols = c("ATTRIBUTE_Location", "sample_name", "ATTRIBUTE_Filament_Possition"))
