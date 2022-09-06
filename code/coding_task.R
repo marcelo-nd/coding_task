@@ -65,7 +65,20 @@ surface_alpha_diversity_asv18s <- get_alpha_diversity(dataframe = surface_asv18s
 
 ##### Read metabolites data #####
 ##########################################################################################
+# Load data
 metabolites <- getDataFromTable("Metabolites_Feature Table.csv", vars_toDrop_beg = 2, vars_toDrop_end = 0)
+
+# Convert char variables into numeric without loosing DF structure
+metabolites <- convert_all_cols_to_numeric(metabolites)
+
+# Extract surface samples in cycle-day-depth order
+surface_metabolites <- metabolites[row.names(metadata_surface),]
+
+# Check samples are in same order
+#row.names(surface_metabolites) == row.names(metadata_surface)
+
+# Get dataframe with metadata and chao1 index information to plot
+surface_alpha_diversity_metabolites <- get_alpha_diversity(dataframe = surface_metabolites, metadata_df = metadata_surface, useful_metadata_cols = c("ATTRIBUTE_Location", "sample_name", "ATTRIBUTE_Filament_Possition"))
 
 ##########################################################################################
 
@@ -156,6 +169,30 @@ bray_pcoa_asv18s <- ggplot(data = surface_bray_pcoa_df_asv18s, aes(x=pcoa1, y=pc
 
 bray_pcoa_asv18s
 
+# Metabolites =================================
+surface_bray_metabolites <- vegan::vegdist(surface_metabolites, method = "bray")
+
+surface_bray_metabolites
+
+surface_bray_pcoa_metabolites <- ecodist::pco(surface_bray_metabolites)
+
+surface_bray_pcoa_df_metabolites <- data.frame(pcoa1 = surface_bray_pcoa_metabolites$vectors[,1], 
+                                          pcoa2 = surface_bray_pcoa_metabolites$vectors[,2],
+                                          cycle = metadata_surface$ATTRIBUTE_Filament_Possition)
+
+bray_pcoa_metabolites <- ggplot(data = surface_bray_pcoa_df_metabolites, aes(x=pcoa1, y=pcoa2, label = metadata_surface$sample_name, colour = cycle)) +
+  geom_point() +
+  geom_text(size = 2, nudge_x = 0.005, nudge_y = 0.005, angle = 45) +
+  geom_hline(yintercept=0) +
+  geom_vline(xintercept = 0) +
+  labs(x = "PCoA1",
+       y = "PCoA2", 
+       title = "PCoA of surface samples using BrayCurtis distance on metabolites") +
+  theme(title = element_text(size = 8))
+
+bray_pcoa_metabolites
+
+
 ##########################################################################################
 
 ##### MDS/PCoA of all samples using BrayCurtis distance #####
@@ -205,6 +242,32 @@ all_bray_plot_18s <- ggplot(data = all_bray_pcoa_df_18s, aes(x=pcoa1, y=pcoa2, l
   theme(title = element_text(size = 8))
 
 all_bray_plot_18s
+# Metabolites =================================
+# Extract samples present in ASVs tables
+metabolites <- metabolites[row.names(asv_16s),]
+
+all_bray_metabolites <- vegan::vegdist(metabolites, method = "bray")
+
+all_bray_metabolites
+
+all_bray_pcoa_metabolites <- ecodist::pco(all_bray_metabolites)
+
+all_bray_pcoa_df_metabolites <- data.frame(pcoa1 = all_bray_pcoa_metabolites$vectors[,1], 
+                                   pcoa2 = all_bray_pcoa_metabolites$vectors[,2],
+                                   cycle = metadata$ATTRIBUTE_Filament_Possition)
+
+all_bray_plot_metabolites <- ggplot(data = all_bray_pcoa_df_metabolites, aes(x=pcoa1, y=pcoa2, label = metadata$sample_name, colour = cycle)) +
+  geom_point() +
+  geom_text(size = 2, nudge_x = 0.005, nudge_y = 0.005, angle = 45) +
+  geom_hline(yintercept=0) +
+  geom_vline(xintercept = 0) +
+  labs(x = "PCoA1",
+       y = "PCoA2", 
+       title = "PCoA of all samples using BrayCurtis distance on metabolites") +
+  theme(title = element_text(size = 8))
+
+all_bray_plot_metabolites
+
 ##########################################################################################
 
 ##########################################################################################
