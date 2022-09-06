@@ -2,119 +2,63 @@ library(dplyr)
 library(vegan)
 library(ggplot2)
 
-# Set working directory
-setwd("C:/Users/marce/Documents/Repos/coding_task/data")
-
-source("C:/Users/marce/Documents/Repos/coding_task/code/helper_functions.R")
-
-##### Read and set up metadata DataFrame #####
-##########################################################################################
-metadata <- getDataFromTable("Metadata.csv", vars_toDrop_beg = 0, vars_toDrop_end = 10)
-
-# Convert ATTRIBUTE_Depth to numeric
-metadata <-transform(metadata, ATTRIBUTE_Depth = as.numeric(ATTRIBUTE_Depth))
-
-# Create new variable (sample_name) that includes cycle + day + depth information
-metadata <- mutate(metadata, sample_name = paste(ATTRIBUTE_Location, ATTRIBUTE_Depth, sep = "_"))
-
-# Select only surface samples (Depth <= 30)
-metadata_surface <- metadata %>%
-  transform(ATTRIBUTE_Depth = as.numeric(ATTRIBUTE_Depth)) %>%
-  filter(ATTRIBUTE_Depth_Range == "0-30") %>%
-  arrange(ATTRIBUTE_Location, ATTRIBUTE_Depth)
-
-##########################################################################################
-
-##### Read ASVs data #####
-##########################################################################################
-# 16s AVSs =================================
-
-# Load data
-asv_16s <- getDataFromTable("ASV_16S.csv", vars_toDrop_beg = 0, vars_toDrop_end = 8)
-
-# Convert char variables into numeric without loosing DF structure
-asv_16s <- convert_all_cols_to_numeric(asv_16s)
-
-# Extract surface samples in cycle-day-depth order
-surface_asv16s <- asv_16s[row.names(metadata_surface),]
-
-# Check samples are in same order
-#row.names(surface_asv16s) == row.names(metadata_surface)
-
-# Get dataframe with metadata and chao1 index information to plot
-surface_alpha_diversity_asv16s <- get_alpha_diversity(dataframe = surface_asv16s, metadata_df = metadata_surface, useful_metadata_cols = c("ATTRIBUTE_Location", "sample_name", "ATTRIBUTE_Filament_Possition"))
-
-# 18s AVSs ================================= 
-# Load data
-asv_18s <- getDataFromTable("ASV_18SV9.csv", vars_toDrop_beg = 0, vars_toDrop_end = 10)
-
-# Convert char variables into numeric without loosing DF structure
-asv_18s <- convert_all_cols_to_numeric(asv_18s)
-
-# Extract surface samples in cycle-day-depth order
-surface_asv18s <- asv_18s[row.names(metadata_surface),]
-
-# Check samples are in same order
-#row.names(surface_asv18s) == row.names(metadata_surface)
-
-# Get dataframe with metadata and chao1 index information to plot
-surface_alpha_diversity_asv18s <- get_alpha_diversity(dataframe = surface_asv18s, metadata_df = metadata_surface, useful_metadata_cols = c("ATTRIBUTE_Location", "sample_name", "ATTRIBUTE_Filament_Possition"))
-
-
-##########################################################################################
-
-##### Read metabolites data #####
-##########################################################################################
-# Load data
-metabolites <- getDataFromTable("Metabolites_Feature Table.csv", vars_toDrop_beg = 2, vars_toDrop_end = 0)
-
-# Convert char variables into numeric without loosing DF structure
-metabolites <- convert_all_cols_to_numeric(metabolites)
-
-# Extract surface samples in cycle-day-depth order
-surface_metabolites <- metabolites[row.names(metadata_surface),]
-
-# Check samples are in same order
-#row.names(surface_metabolites) == row.names(metadata_surface)
-
-# Get dataframe with metadata and chao1 index information to plot
-surface_alpha_diversity_metabolites <- get_alpha_diversity(dataframe = surface_metabolites, metadata_df = metadata_surface, useful_metadata_cols = c("ATTRIBUTE_Location", "sample_name", "ATTRIBUTE_Filament_Possition"))
-
-##########################################################################################
-
 ##### Plot alpha diversity #####
 ##########################################################################################
 # 16s AVSs =================================
 # Plot all samples separately
-ggplot(surface_alpha_diversity_asv16s, aes(x=sample_name, y=Chao1))+
+ggplot(surface_alpha_diversity_asv16s, aes(x=sample_name, y=Shannon))+
   geom_point() +
   labs(x = "Samples",
-       title = "Alpha diversity for 16S AVSs of Surface Samples") +
+       y = "Shannon Index",
+       title = "Alpha diversity (Shannon) for 16S AVSs of Surface Samples") +
   theme(title = element_text(size = 10),
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
 # Plot average alpha diversity per cycle-day
-ggplot(surface_alpha_diversity_asv16s, aes(x=ATTRIBUTE_Location, y=Chao1))+
+ggplot(surface_alpha_diversity_asv16s, aes(x=ATTRIBUTE_Location, y=Shannon))+
   geom_boxplot() +
   labs(x = "Samples",
-       title = "Average Alpha diversity per cycle-day for 16S AVSs of Surface Samples") +
+       y = "Shannon Index",
+       title = "Average Alpha diversity (Shannon) per cycle-day for 16S AVSs of Surface Samples") +
   theme(title = element_text(size = 8),
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
 # 18s AVSs =================================
 # Plot all samples separately
-ggplot(surface_alpha_diversity_asv18s, aes(x=sample_name, y=Chao1))+
+ggplot(surface_alpha_diversity_asv18s, aes(x=sample_name, y=Shannon))+
   geom_point() +
   labs(x = "Samples",
-       title = "Alpha diversity for 18S AVSs of Surface Samples") +
+       y = "Shannon Index",
+       title = "Alpha diversity (Shannon) for 18S AVSs of Surface Samples") +
   theme(title = element_text(size = 10),
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
 # Plot average alpha diversity per cycle-day
-ggplot(surface_alpha_diversity_asv18s, aes(x=ATTRIBUTE_Location, y=Chao1))+
+ggplot(surface_alpha_diversity_asv18s, aes(x=ATTRIBUTE_Location, y=Shannon))+
   geom_boxplot() +
   labs(x = "Samples",
-       title = "Average Alpha diversity per cycle-day for 18S AVSs of Surface Samples") +
+       y = "Shannon Index",
+       title = "Average Alpha diversity (Shannon) per cycle-day for 18S AVSs of Surface Samples") +
+  theme(title = element_text(size = 8),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+
+# Metabolites =================================
+# Plot all samples separately
+ggplot(surface_alpha_diversity_metabolites, aes(x=sample_name, y=Shannon))+
+  geom_point() +
+  labs(x = "Samples",
+       y = "Shannon Index",
+       title = "Alpha diversity (Shannon) for Metabolites of Surface Samples") +
+  theme(title = element_text(size = 10),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+# Plot average alpha diversity per cycle-day
+ggplot(surface_alpha_diversity_metabolites, aes(x=ATTRIBUTE_Location, y=Shannon))+
+  geom_boxplot() +
+  labs(x = "Samples",
+       y = "Shannon Index",
+       title = "Average Alpha diversity (Shannon) per cycle-day for Metabolites of Surface Samples") +
   theme(title = element_text(size = 8),
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
@@ -267,7 +211,5 @@ all_bray_plot_metabolites <- ggplot(data = all_bray_pcoa_df_metabolites, aes(x=p
   theme(title = element_text(size = 8))
 
 all_bray_plot_metabolites
-
-##########################################################################################
 
 ##########################################################################################
