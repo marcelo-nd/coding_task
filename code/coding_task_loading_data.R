@@ -9,6 +9,7 @@ source("C:/Users/marce/Documents/Repos/coding_task/code/helper_functions.R")
 
 ##### Read and set up metadata DataFrame #####
 ##########################################################################################
+# Read metadata
 metadata <- getDataFromTable("Metadata.csv", vars_toDrop_beg = 0, vars_toDrop_end = 10)
 
 # Convert ATTRIBUTE_Depth to numeric
@@ -21,7 +22,7 @@ metadata <- mutate(metadata, sample_name = paste(ATTRIBUTE_Location, ATTRIBUTE_D
 metadata_surface <- metadata %>%
   transform(ATTRIBUTE_Depth = as.numeric(ATTRIBUTE_Depth)) %>%
   filter(ATTRIBUTE_Depth_Range == "0-30") %>%
-  arrange(ATTRIBUTE_Location, ATTRIBUTE_Depth)
+  arrange(ATTRIBUTE_Location, ATTRIBUTE_Depth) # Order samples by "Cycle-day" and depth
 
 ##########################################################################################
 
@@ -41,7 +42,7 @@ surface_asv16s <- asv_16s[row.names(metadata_surface),]
 # Check samples are in same order
 row.names(surface_asv16s) == row.names(metadata_surface)
 
-# Get dataframe with metadata and chao1 index information to plot
+# Get dataframe with metadata and Shannon index information to plot
 surface_alpha_diversity_asv16s <- get_alpha_diversity(dataframe = surface_asv16s, metadata_df = metadata_surface, useful_metadata_cols = c("ATTRIBUTE_Location", "sample_name", "ATTRIBUTE_Filament_Possition"))
 
 # 18s AVSs ================================= 
@@ -71,13 +72,13 @@ metabolites <- getDataFromTable("Metabolites_Feature Table.csv", vars_toDrop_beg
 # Convert char variables into numeric without loosing DF structure
 metabolites <- convert_all_cols_to_numeric(metabolites)
 
+# Converting metabilite data to integers
+# Multiply by 10E5 and rounding
 metabolites <- metabolites * 100000
-
 metabolites <- mutate_all(metabolites, round)
 
+# Convert values to 0 if values are < than specified min value
 metabolites <- mutate_if(metabolites, is.numeric, list(~ifelse(is_less_than_value(., 10), 0, .)))
-
-#hist(metabolites$X4969, breaks=500)
 
 # Extract surface samples in cycle-day-depth order
 surface_metabolites <- metabolites[row.names(metadata_surface),]
@@ -85,7 +86,7 @@ surface_metabolites <- metabolites[row.names(metadata_surface),]
 # Check samples are in same order
 row.names(surface_metabolites) == row.names(metadata_surface)
 
-# Get dataframe with metadata and chao1 index information to plot
+# Get dataframe with metadata and Shannon index information to plot
 surface_alpha_diversity_metabolites <- get_alpha_diversity(dataframe = surface_metabolites, metadata_df = metadata_surface, useful_metadata_cols = c("ATTRIBUTE_Location", "sample_name", "ATTRIBUTE_Filament_Possition"))
 
 ##########################################################################################
